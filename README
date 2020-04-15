@@ -1,0 +1,31 @@
+Simple CPLEX service and client implementation for Docker.
+
+The service is based on Python. It receives a model file and optionally a
+parameter file and then solves the model.
+The main purpose of this is to illustrate how one could build a simple service
+that solves optimization problems with CPLEX.
+To build the container run the following command from this directory
+(assuming $COSDIR points to a valid CPLEX installation):
+   tar cvzf - --transform='s,^.*cplex/python/3.6/x86-64_linux/,,' \
+        $COSDIR/cplex/python/3.6/x86-64_linux/cplex \
+        ./service.py \
+        ./Dockerfile \
+        | \
+        docker build \
+        --tag=cplex/flask_service:12.9 \
+        --tag=cplex/flask_service:latest \
+        -f Dockerfile \
+        -
+Adapt the '12.9' and 'latest' tags depending on your needs and on the version
+of CPLEX you build with.
+After building the container you can start it with
+   docker --rm -p 50010:5000 cplex/flask_service:12.9
+The container listens on port 5000 and the above command line connects this
+to port 5000 on the local host. This is the default configuration used in
+client.py.
+
+To test the service in docker you can use the client.py script from this
+directory:
+   python ./client.py model.lp
+The client reads the model, submits it to the service, solves it for 10 seconds
+(displaying some progress messages) and stops the solve.
